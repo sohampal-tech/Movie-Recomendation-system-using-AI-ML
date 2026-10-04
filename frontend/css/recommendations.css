@@ -1,0 +1,57 @@
+/* ===================================================================
+   CineMatch – Recommendations Page Extras
+   =================================================================== */
+
+.rec-card {
+  position: relative;
+  overflow: visible;
+}
+.rec-score-ring {
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 44px;
+  height: 44px;
+  z-index: 3;
+}
+.rec-score-ring svg {
+  transform: rotate(-90deg);
+}
+.rec-score-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: white;
+}
+
+.score-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 0.8rem 0.8rem;
+}
+.score-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+.score-bar-track {
+  flex: 1;
+  height: 3px;
+  background: var(--glass-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s cubic-bezier(0.4,0,0.2,1);
+}
+.score-bar-fill.cf   { background: var(--grad-primary); }
+.score-bar-fill.cb   { background: var(--grad-cool); }

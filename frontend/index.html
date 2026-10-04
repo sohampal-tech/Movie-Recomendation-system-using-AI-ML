@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CineMatch – Hybrid AI Movie Recommender & Platform</title>
+  <meta name="description" content="CineMatch delivers intelligent personalised movie recommendations combining SVD Collaborative Filtering and TF-IDF Content-Based AI with PostgreSQL cloud database sync." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ────────── NAVBAR ────────── -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand" onclick="showPage('home')">
+      <div class="nav-logo">
+        <svg width="34" height="34" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="15" stroke="url(#g1)" stroke-width="2"/>
+          <circle cx="16" cy="16" r="6" fill="url(#g2)"/>
+          <line x1="16" y1="1" x2="16" y2="8" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/>
+          <line x1="16" y1="24" x2="16" y2="31" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/>
+          <line x1="1" y1="16" x2="8" y2="16" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/>
+          <line x1="24" y1="16" x2="31" y2="16" stroke="#a855f7" stroke-width="2" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="32" y2="32">
+              <stop offset="0%" stop-color="#6c63ff"/>
+              <stop offset="100%" stop-color="#a855f7"/>
+            </linearGradient>
+            <linearGradient id="g2" x1="0" y1="0" x2="32" y2="32">
+              <stop offset="0%" stop-color="#6c63ff"/>
+              <stop offset="100%" stop-color="#a855f7"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span class="brand-text">CineMatch</span>
+      </div>
+    </div>
+
+    <div class="nav-links">
+      <a href="javascript:void(0)" class="nav-link active" id="nav-home" onclick="showPage('home')">Home</a>
+      <a href="javascript:void(0)" class="nav-link" id="nav-explore" onclick="showPage('explore')">Explore</a>
+      <a href="javascript:void(0)" class="nav-link" id="nav-recommendations" onclick="showPage('recommendations')">My Picks</a>
+      <a href="javascript:void(0)" class="nav-link" id="nav-watchlist" onclick="showPage('watchlist')">Watchlist</a>
+      <a href="javascript:void(0)" class="nav-link" id="nav-login" onclick="showPage('login')">Sign In</a>
+    </div>
+
+    <div class="nav-right">
+      <div class="search-bar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" id="global-search" placeholder="Search movies, cast, genres…" autocomplete="off" />
+      </div>
+
+      <!-- User Profile Menu -->
+      <div class="user-menu-container" id="user-menu-container">
+        <div class="user-pill" id="user-pill" onclick="handleUserPillClick()">
+          <span id="user-avatar-icon">👤</span>
+          <span id="user-display-name">Sign In</span>
+          <span class="pill-badge" id="user-pill-badge" style="display:none">Online</span>
+        </div>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="dropdown-header">
+            <div class="dropdown-user-name" id="drop-user-name">Guest User</div>
+            <div class="dropdown-user-email" id="drop-user-email">guest@cinematch.ai</div>
+          </div>
+          <div class="dropdown-divider"></div>
+          <a href="javascript:void(0)" class="dropdown-item" onclick="showPage('recommendations')">
+            <span>🎯</span> My Recommendations
+          </a>
+          <a href="javascript:void(0)" class="dropdown-item" onclick="showPage('watchlist')">
+            <span>📑</span> My Watchlist
+          </a>
+          <a href="javascript:void(0)" class="dropdown-item" onclick="showUserProfileModal()">
+            <span>👤</span> Profile &amp; Stats
+          </a>
+          <div class="dropdown-divider"></div>
+          <a href="javascript:void(0)" class="dropdown-item text-danger" onclick="showPage('logout')">
+            <span>🚪</span> Sign Out
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ────────── MAIN CONTENT ────────── -->
+  <main class="main-content">
+
+    <!-- 1. HOME PAGE -->
+    <section id="page-home" class="page active">
+      <div class="hero">
+        <div class="hero-bg-particles" id="particles"></div>
+        <div class="hero-content">
+          <h1 class="hero-title">Your Next Favorite Film,<br/><span class="gradient-text">Discovered by AI</span></h1>
+          <p class="hero-subtitle">Combining collaborative matrix factorization with deep content-based semantics for hyper-personalized movie curation.</p>
+          <div class="hero-actions">
+            <button class="btn-primary btn-glow" id="btn-get-recs" onclick="handleGetRecs()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Get My Recommendations
+            </button>
+            <button class="btn-secondary" onclick="showPage('explore')">Browse Catalogue</button>
+            <button class="btn-glass" onclick="showPage('login')">Account Portal</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trending Section -->
+      <div class="section-container">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">🔥 Trending &amp; Popular</h2>
+            <p class="section-sub">Most active titles across user ratings</p>
+          </div>
+          <button class="see-all-btn" onclick="showPage('explore')">Explore All →</button>
+        </div>
+        <div class="movie-row" id="trending-movies"></div>
+      </div>
+
+      <!-- Top Rated Section -->
+      <div class="section-container">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">⭐ Critically Acclaimed</h2>
+            <p class="section-sub">Highest rated masterpieces across all genres</p>
+          </div>
+        </div>
+        <div class="movie-row" id="top-rated-movies"></div>
+      </div>
+    </section>
+
+    <!-- 2. EXPLORE PAGE -->
+    <section id="page-explore" class="page">
+      <div class="explore-header">
+        <div>
+          <h1 class="page-title">Explore Movies</h1>
+          <p class="page-subtitle">Filter by genre, search keywords, cast, and directors</p>
+        </div>
+        <div class="explore-controls">
+          <input type="text" id="explore-search" class="explore-search" placeholder="🔍 Search title, cast, director…" />
+          <select id="genre-filter" class="genre-select">
+            <option value="">All Genres</option>
+          </select>
+          <select id="sort-filter" class="genre-select" onchange="loadExploreMovies(1)">
+            <option value="rating_desc">Highest Rating</option>
+            <option value="year_desc">Newest First</option>
+            <option value="title_asc">Title (A-Z)</option>
+          </select>
+        </div>
+      </div>
+      <div class="movie-grid" id="explore-grid"></div>
+      <div class="pagination" id="pagination"></div>
+    </section>
+
+    <!-- 3. RECOMMENDATIONS PAGE -->
+    <section id="page-recommendations" class="page">
+      <div class="rec-header">
+        <div>
+          <h1 class="page-title">Personalized Picks for You</h1>
+          <p class="page-subtitle" id="rec-subtitle">AI-computed recommendations tailored to your taste profile.</p>
+        </div>
+        <div class="alpha-control" id="alpha-control" style="display:none">
+          <label>Algorithm Blend: <span id="alpha-label">60% Collaborative / 40% Content</span></label>
+          <div class="slider-row">
+            <span class="slider-tag">Content</span>
+            <input type="range" id="alpha-slider" min="0" max="100" value="60" class="slider" oninput="updateAlphaLabel(this.value)" />
+            <span class="slider-tag">Collaborative</span>
+            <button class="btn-sm btn-glow" onclick="applyAlpha()">Apply Blend</button>
+          </div>
+        </div>
+      </div>
+      <div id="rec-login-prompt" class="login-prompt">
+        <div class="login-prompt-icon">🎬</div>
+        <h2>Unlock Your Personalized Movie Universe</h2>
+        <p>Sign in to your account or pick a demo user to generate real-time AI recommendations.</p>
+        <div class="prompt-actions">
+          <button class="btn-primary btn-glow" onclick="showPage('login')">Sign In / Register</button>
+          <button class="btn-secondary" onclick="quickLoginDemo(42)">Quick Demo (User #42)</button>
+        </div>
+      </div>
+      <div class="movie-grid" id="rec-grid" style="display:none"></div>
+    </section>
+
+    <!-- 4. WATCHLIST PAGE -->
+    <section id="page-watchlist" class="page">
+      <div class="explore-header">
+        <div>
+          <h1 class="page-title">My Saved Watchlist</h1>
+          <p class="page-subtitle">Movies you have bookmarked to watch later</p>
+        </div>
+        <button class="btn-secondary" onclick="showPage('explore')">+ Discover More</button>
+      </div>
+      <div id="watchlist-empty" class="login-prompt" style="display:none">
+        <div class="login-prompt-icon">📑</div>
+        <h2>Your Watchlist is Empty</h2>
+        <p>Explore movies and click the bookmark button on any movie card to add it to your watchlist.</p>
+        <button class="btn-primary" onclick="showPage('explore')">Explore Movies</button>
+      </div>
+      <div class="movie-grid" id="watchlist-grid"></div>
+    </section>
+
+    <!-- 5. DEDICATED LOGIN & REGISTER PAGE -->
+    <section id="page-login" class="page">
+      <div class="auth-page-container">
+        <div class="auth-card">
+          <div class="auth-header">
+            <div class="auth-logo">🎬 CineMatch Auth</div>
+            <h2 class="auth-title" id="auth-main-title">Welcome Back</h2>
+            <p class="auth-subtitle" id="auth-main-sub">Sign in to access your custom AI movie recommendations and ratings.</p>
+          </div>
+
+          <!-- Tab Switcher -->
+          <div class="auth-tabs">
+            <button class="auth-tab-btn active" id="tab-login-btn" onclick="switchAuthTab('login')">Sign In</button>
+            <button class="auth-tab-btn" id="tab-register-btn" onclick="switchAuthTab('register')">Create Account</button>
+          </div>
+
+          <!-- SIGN IN TAB FORM -->
+          <div class="auth-tab-content active" id="tab-login-content">
+            <form id="form-signin" onsubmit="handleFormLogin(event)">
+              <div class="form-group">
+                <label>Email Address or Username</label>
+                <input type="text" id="signin-identifier" class="form-input" placeholder="e.g. alice@cinematch.ai or alice" required />
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="signin-password" class="form-input" placeholder="Enter your password (or 'password123')" required />
+              </div>
+              <button type="submit" class="btn-primary btn-glow btn-block" id="btn-signin-submit">Sign In to CineMatch</button>
+            </form>
+
+            <div class="auth-divider"><span>OR ONE-CLICK DEMO LOGIN</span></div>
+
+            <div class="demo-users-grid">
+              <button type="button" class="demo-chip" onclick="quickLoginDemo(1)">
+                <span>👤</span>
+                <div>
+                  <strong>Alice</strong>
+                  <small>Sci-Fi Fan (#1)</small>
+                </div>
+              </button>
+              <button type="button" class="demo-chip" onclick="quickLoginDemo(2)">
+                <span>👤</span>
+                <div>
+                  <strong>Bob</strong>
+                  <small>Comedy (#2)</small>
+                </div>
+              </button>
+              <button type="button" class="demo-chip" onclick="quickLoginDemo(3)">
+                <span>👤</span>
+                <div>
+                  <strong>Carol</strong>
+                  <small>Drama/Thriller (#3)</small>
+                </div>
+              </button>
+              <button type="button" class="demo-chip" onclick="quickLoginDemo(42)">
+                <span>⭐</span>
+                <div>
+                  <strong>Demo User</strong>
+                  <small>Action/Sci-Fi (#42)</small>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- REGISTER TAB FORM -->
+          <div class="auth-tab-content" id="tab-register-content">
+            <form id="form-register" onsubmit="handleFormRegister(event)">
+              <div class="form-group">
+                <label>Choose Username</label>
+                <input type="text" id="reg-username" class="form-input" placeholder="e.g. movie_buff_99" required />
+              </div>
+              <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="reg-email" class="form-input" placeholder="e.g. yourname@example.com" required />
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="reg-password" class="form-input" placeholder="At least 4 characters" minlength="4" required />
+              </div>
+              <div class="form-group">
+                <label>Favorite Genres (Pick to boost recommendations)</label>
+                <div class="genre-pills-selector" id="reg-genre-pills">
+                  <span class="genre-toggle" onclick="toggleGenrePill(this)" data-genre="Action">💥 Action</span>
+                  <span class="genre-toggle" onclick="toggleGenrePill(this)" data-genre="Sci-Fi">🚀 Sci-Fi</span>
+                  <span class="genre-toggle" onclick="toggleGenrePill(this)" data-genre="Comedy">😂 Comedy</span>
+                  <span class="genre-toggle" onclick="toggleGenrePill(this)" data-genre="Drama">🎭 Drama</span>
+                  <span class="genre-toggle" onclick="toggleGenrePill(this)" data-genre="Thriller">😱 Thriller</span>
+                  <span class="genre-toggle" onclick="toggleGenrePill(this)" data-genre="Adventure">🗺️ Adventure</span>
+                  <span class="genre-toggle" onclick="toggleGenrePill(this)" data-genre="Romance">❤️ Romance</span>
+                  <span class="genre-toggle" onclick="toggleGenrePill(this)" data-genre="Fantasy">🧙 Fantasy</span>
+                  <span class="genre-toggle" onclick="toggleGenrePill(this)" data-genre="Crime">🔫 Crime</span>
+                  <span class="genre-toggle" onclick="toggleGenrePill(this)" data-genre="Animation">🎨 Animation</span>
+                </div>
+              </div>
+              <button type="submit" class="btn-primary btn-glow btn-block" id="btn-register-submit">Create Account</button>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. DEDICATED LOGOUT PAGE -->
+    <section id="page-logout" class="page">
+      <div class="logout-page-container">
+        <div class="logout-card">
+          <div class="logout-icon-wrap">
+            <span class="logout-icon">👋</span>
+          </div>
+          <h1 class="logout-title">You Have Signed Out</h1>
+          <p class="logout-subtitle">Your session has ended securely. Thank you for watching and rating films on CineMatch!</p>
+          
+          <div class="logout-stats-box">
+            <div class="logout-stat">
+              <strong id="logout-last-user">Guest</strong>
+              <span>Last Active Account</span>
+            </div>
+            <div class="logout-stat">
+              <strong>Neon Postgres</strong>
+              <span>Cloud Synced</span>
+            </div>
+            <div class="logout-stat">
+              <strong>JWT</strong>
+              <span>Session Cleared</span>
+            </div>
+          </div>
+
+          <div class="logout-actions">
+            <button class="btn-primary btn-glow" onclick="showPage('login')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+              Sign In Again
+            </button>
+            <button class="btn-secondary" onclick="showPage('home')">
+              Return to Home
+            </button>
+            <button class="btn-glass" onclick="showPage('explore')">
+              Browse Movies as Guest
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ────────── MODALS ────────── -->
+
+  <!-- Movie Detail Modal -->
+  <div class="modal-overlay" id="movie-modal" onclick="closeModal('movie-modal')">
+    <div class="modal modal-wide" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal('movie-modal')">✕</button>
+      <div id="movie-modal-content"></div>
+    </div>
+  </div>
+
+  <!-- User Profile Modal -->
+  <div class="modal-overlay" id="profile-modal" onclick="closeModal('profile-modal')">
+    <div class="modal modal-wide" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal('profile-modal')">✕</button>
+      <div id="profile-modal-content"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <!-- JavaScript Scripts -->
+  <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/recommendations.js"></script>
+</body>
+</html>
