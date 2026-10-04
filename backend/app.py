@@ -126,6 +126,10 @@ def create_app() -> Flask:
     return app
 
 
+# Top-level WSGI entry point for Vercel and production servers
+app = create_app()
+application = app
+handler = app
+
 if __name__ == "__main__":
-    application = create_app()
-    application.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
