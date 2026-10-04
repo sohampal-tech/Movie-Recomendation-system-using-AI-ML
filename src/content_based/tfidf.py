@@ -20,7 +20,10 @@ class TFIDFVectorizer:
 
     def __init__(self, model_dir: str = "models"):
         self.model_dir = Path(model_dir)
-        self.model_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            self.model_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
         self._vectorizer = SklearnTFIDF(
             stop_words="english",
             ngram_range=(1, 2),
@@ -56,11 +59,14 @@ class TFIDFVectorizer:
     # ------------------------------------------------------------------
 
     def _save(self):
-        joblib.dump(
-            self._vectorizer,
-            self.model_dir / "tfidf_vectorizer.pkl",
-        )
-        logger.info("TF-IDF vectorizer saved")
+        try:
+            joblib.dump(
+                self._vectorizer,
+                self.model_dir / "tfidf_vectorizer.pkl",
+            )
+            logger.info("TF-IDF vectorizer saved")
+        except Exception as e:
+            logger.debug(f"Skipping save (read-only): {e}")
 
     def load(self):
         path = self.model_dir / "tfidf_vectorizer.pkl"

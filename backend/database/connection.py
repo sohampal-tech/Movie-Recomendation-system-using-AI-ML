@@ -28,9 +28,13 @@ def build_database_url() -> str:
     if db_host and db_user and db_password:
         return f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}?sslmode=require"
 
-    # Default fallback: local sqlite database
-    os.makedirs("data", exist_ok=True)
-    return "sqlite:///data/movies.db"
+    # Default fallback: local sqlite database (use /tmp in serverless/read-only environments)
+    tmp_dir = "/tmp" if os.path.exists("/tmp") else "data"
+    try:
+        os.makedirs(tmp_dir, exist_ok=True)
+    except Exception:
+        pass
+    return f"sqlite:///{tmp_dir}/movies.db"
 
 
 DATABASE_URL = build_database_url()

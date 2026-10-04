@@ -19,7 +19,10 @@ class DataPreprocessor:
 
     def __init__(self, processed_dir: str = "data/processed"):
         self.processed_dir = Path(processed_dir)
-        self.processed_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            self.processed_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
         self._scaler = MinMaxScaler()
 
     # ------------------------------------------------------------------
@@ -32,8 +35,11 @@ class DataPreprocessor:
         df = self._clean_text_fields(df)
         df = self._normalize_ratings(df)
         df = self._build_soup(df)
-        df.to_csv(self.processed_dir / "movies_clean.csv", index=False)
-        logger.info(f"Saved {len(df)} cleaned movies")
+        try:
+            df.to_csv(self.processed_dir / "movies_clean.csv", index=False)
+            logger.info(f"Saved {len(df)} cleaned movies")
+        except Exception as e:
+            logger.debug(f"Skipping save (read-only): {e}")
         return df
 
     def preprocess_ratings(self, ratings_df: pd.DataFrame) -> pd.DataFrame:
@@ -41,8 +47,11 @@ class DataPreprocessor:
         df = df.drop_duplicates(subset=["user_id", "movie_id"])
         df = df.dropna(subset=["user_id", "movie_id", "rating"])
         df["rating"] = df["rating"].clip(0.5, 5.0)
-        df.to_csv(self.processed_dir / "ratings_clean.csv", index=False)
-        logger.info(f"Saved {len(df)} cleaned ratings")
+        try:
+            df.to_csv(self.processed_dir / "ratings_clean.csv", index=False)
+            logger.info(f"Saved {len(df)} cleaned ratings")
+        except Exception as e:
+            logger.debug(f"Skipping save (read-only): {e}")
         return df
 
     def build_movie_features(self, movies_df: pd.DataFrame) -> pd.DataFrame:
@@ -57,8 +66,11 @@ class DataPreprocessor:
         # Normalise numeric columns
         num_cols = ["avg_rating", "year"]
         features[num_cols] = self._scaler.fit_transform(features[num_cols].fillna(0))
-        features.to_csv(self.processed_dir / "movie_features.csv", index=False)
-        logger.info(f"Saved feature matrix with shape {features.shape}")
+        try:
+            features.to_csv(self.processed_dir / "movie_features.csv", index=False)
+            logger.info(f"Saved feature matrix with shape {features.shape}")
+        except Exception as e:
+            logger.debug(f"Skipping save (read-only): {e}")
         return features
 
     # ------------------------------------------------------------------

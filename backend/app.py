@@ -5,6 +5,8 @@ Flask application factory, database initialization, and model bootstrap.
 import os
 import logging
 from pathlib import Path
+import numpy as np
+import pandas as pd
 from flask import Flask, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -35,17 +37,34 @@ def bootstrap_models(app: Flask):
         logger.warning(f"Database bootstrap warning: {e}")
 
     model_dir = "models"
-    Path(model_dir).mkdir(exist_ok=True)
+    try:
+        Path(model_dir).mkdir(exist_ok=True)
+    except Exception:
+        pass
 
     loader = DataLoader()
     preprocessor = DataPreprocessor()
 
-    movies_raw = loader.load_movies()
-    ratings_raw = loader.load_ratings()
+    # Load from processed cache for instant serverless cold-start
+    proc_movies = Path("data/processed/movies_clean.csv")
+    proc_ratings = Path("data/processed/ratings_clean.csv")
 
-    movies = preprocessor.preprocess_movies(movies_raw)
-    ratings = preprocessor.preprocess_ratings(ratings_raw)
-    preprocessor.build_movie_features(movies)
+    if proc_movies.exists():
+        movies = pd.read_csv(proc_movies)
+    else:
+        movies_raw = loader.load_movies()
+        movies = preprocessor.preprocess_movies(movies_raw)
+
+    if proc_ratings.exists():
+        ratings = pd.read_csv(proc_ratings)
+    else:
+        ratings_raw = loader.load_ratings()
+        ratings = preprocessor.preprocess_ratings(ratings_raw)
+
+    try:
+        preprocessor.build_movie_features(movies)
+    except Exception:
+        pass
 
     # Content-based
     tfidf = TFIDFVectorizer(model_dir=model_dir)

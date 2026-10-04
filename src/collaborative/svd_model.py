@@ -31,7 +31,10 @@ class SVDModel:
 
     def __init__(self, model_dir: str = "models", n_factors: int = 50):
         self.model_dir = Path(model_dir)
-        self.model_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            self.model_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
         self.n_factors = n_factors
         self._model = None
         self._trainset = None
@@ -148,8 +151,11 @@ class SVDModel:
     # ------------------------------------------------------------------
 
     def _save(self):
-        joblib.dump(self, self.model_dir / "collaborative_svd.pkl")
-        logger.info("SVD model saved")
+        try:
+            joblib.dump(self, self.model_dir / "collaborative_svd.pkl")
+            logger.info("SVD model saved")
+        except Exception as e:
+            logger.debug(f"Skipping save (read-only): {e}")
 
     @classmethod
     def load(cls, model_dir: str = "models") -> "SVDModel":

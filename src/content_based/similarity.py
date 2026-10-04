@@ -20,7 +20,10 @@ class SimilarityCalculator:
 
     def __init__(self, model_dir: str = "models"):
         self.model_dir = Path(model_dir)
-        self.model_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            self.model_dir.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
         self.similarity_matrix: Optional[np.ndarray] = None
         self.movies_df: Optional[pd.DataFrame] = None
 
@@ -109,11 +112,14 @@ class SimilarityCalculator:
     # ------------------------------------------------------------------
 
     def _save(self):
-        joblib.dump(
-            self.similarity_matrix,
-            self.model_dir / "similarity_matrix.pkl",
-        )
-        logger.info("Similarity matrix saved")
+        try:
+            joblib.dump(
+                self.similarity_matrix,
+                self.model_dir / "similarity_matrix.pkl",
+            )
+            logger.info("Similarity matrix saved")
+        except Exception as e:
+            logger.debug(f"Skipping save (read-only): {e}")
 
     def load(self, movies_df: pd.DataFrame):
         path = self.model_dir / "similarity_matrix.pkl"
