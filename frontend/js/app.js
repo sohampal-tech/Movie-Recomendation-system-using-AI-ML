@@ -1,7 +1,6 @@
-/**
- * app.js – Core application: routing, movie cards, API calls, watchlist, particles
- */
-const API = 'http://127.0.0.1:5000/api';
+const API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://127.0.0.1:5000/api'
+  : '/api';
 window.POSTERS_MAP = {};
 
 // Fallback high-res poster fallback
